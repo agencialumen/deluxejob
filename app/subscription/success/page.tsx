@@ -7,23 +7,38 @@ import { Card, CardContent } from "@/components/ui/card"
 import { CheckCircle, Sparkles, ArrowRight, Home } from "lucide-react"
 import { useAuthState } from "react-firebase-hooks/auth"
 import { auth } from "@/lib/firebase/config"
+import { getUserProfile } from "@/lib/firebase/firestore"
 
 export default function SubscriptionSuccessPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [user] = useAuthState(auth)
   const [loading, setLoading] = useState(true)
+  const [username, setUsername] = useState<string | null>(null)
 
   const sessionId = searchParams.get("session_id")
 
   useEffect(() => {
-    // Simulate loading the subscription details
-    const timer = setTimeout(() => {
+    const loadUserProfile = async () => {
+      if (user) {
+        try {
+          const profile = await getUserProfile(user.uid)
+          if (profile) {
+            setUsername(profile.username)
+          }
+        } catch (error) {
+          console.error("[v0] Error loading user profile:", error)
+        }
+      }
       setLoading(false)
+    }
+
+    const timer = setTimeout(() => {
+      loadUserProfile()
     }, 1500)
 
     return () => clearTimeout(timer)
-  }, [])
+  }, [user])
 
   if (loading) {
     return (
@@ -101,7 +116,13 @@ export default function SubscriptionSuccessPage() {
           {/* Action Buttons */}
           <div className="space-y-3">
             <Button
-              onClick={() => router.push(user ? `/profile/${user.uid}` : "/")}
+              onClick={() => {
+                if (username) {
+                  router.push(`/user/${username}`)
+                } else {
+                  router.push("/")
+                }
+              }}
               className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground font-semibold py-6 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300"
             >
               Ver Meu Perfil

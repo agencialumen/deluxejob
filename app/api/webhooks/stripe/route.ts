@@ -83,7 +83,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     return
   }
 
-  const { updateUserSubscription } = await import("@/lib/firebase/firestore")
+  const { updateUserSubscription, updateUserLevel } = await import("@/lib/firebase/firestore")
 
   // Update user subscription status
   await updateUserSubscription(userId, {
@@ -93,7 +93,17 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     stripeSubscriptionId: session.subscription as string,
   })
 
-  console.log("[v0] User subscription updated:", userId, tier)
+  // Update user level to match subscription tier
+  const levelMap: Record<string, "Bronze" | "Prata" | "Gold" | "Platinum" | "Diamante"> = {
+    prata: "Prata",
+    gold: "Gold",
+    platinum: "Platinum",
+    diamante: "Diamante",
+  }
+
+  await updateUserLevel(userId, levelMap[tier])
+
+  console.log("[v0] User subscription and level updated:", userId, tier, levelMap[tier])
 }
 
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
@@ -107,13 +117,25 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     return
   }
 
-  const { updateUserSubscription } = await import("@/lib/firebase/firestore")
+  const { updateUserSubscription, updateUserLevel } = await import("@/lib/firebase/firestore")
 
   await updateUserSubscription(userId, {
     tier,
     status: subscription.status as "active" | "canceled" | "past_due",
     stripeSubscriptionId: subscription.id,
   })
+
+  // Update user level to match subscription tier
+  const levelMap: Record<string, "Bronze" | "Prata" | "Gold" | "Platinum" | "Diamante"> = {
+    prata: "Prata",
+    gold: "Gold",
+    platinum: "Platinum",
+    diamante: "Diamante",
+  }
+
+  await updateUserLevel(userId, levelMap[tier])
+
+  console.log("[v0] User subscription and level updated:", userId, tier, levelMap[tier])
 }
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
@@ -126,12 +148,17 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     return
   }
 
-  const { updateUserSubscription } = await import("@/lib/firebase/firestore")
+  const { updateUserSubscription, updateUserLevel } = await import("@/lib/firebase/firestore")
 
   await updateUserSubscription(userId, {
     tier: "bronze",
     status: "canceled",
   })
+
+  // Reset user level to Bronze when subscription is canceled
+  await updateUserLevel(userId, "Bronze")
+
+  console.log("[v0] User subscription canceled and level reset to Bronze:", userId)
 }
 
 async function handleInvoicePaid(invoice: Stripe.Invoice) {
