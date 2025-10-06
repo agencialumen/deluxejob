@@ -41,7 +41,7 @@ export interface UserProfile {
   satisfaction?: number
   subscription?: {
     // Adicionado para Stripe integration
-    tier: "prata" | "gold" | "platinum" | "diamante"
+    tier: "prata" | "gold" | "platinum" | "diamante" | "bronze" // Adicionado bronze
     stripeSubscriptionId: string
     stripeCustomerId: string
     status: "active" | "canceled" | "past_due"
@@ -2468,7 +2468,7 @@ export const getCreatorTransactions = async (creatorId: string, limitCount = 50)
     return transactions.sort((a, b) => {
       const dateA = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt)
       const dateB = b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt)
-      return dateB.getTime() - dateA.getTime()
+      return dateB.getTime() - a.getTime()
     })
   } catch (error) {
     console.error("[v0] Error getting transactions:", error)
@@ -2658,13 +2658,13 @@ export const addCreatorToNetworkWithCode = async (
 
 export const updateUserSubscription = async (
   userId: string,
-  subscriptionData: {
-    tier: "prata" | "gold" | "platinum" | "diamante"
+  subscriptionData: Partial<{
+    tier: "prata" | "gold" | "platinum" | "diamante" | "bronze"
     stripeSubscriptionId: string
     stripeCustomerId: string
     status: "active" | "canceled" | "past_due"
     currentPeriodEnd: Date
-  },
+  }>,
 ): Promise<void> => {
   try {
     const userRef = doc(db, "users", userId)
@@ -2672,7 +2672,7 @@ export const updateUserSubscription = async (
       subscription: subscriptionData,
       updatedAt: serverTimestamp(),
     })
-    console.log("[v0] User subscription updated successfully")
+    console.log("[v0] User subscription updated successfully:", subscriptionData)
   } catch (error) {
     console.error("[v0] Error updating user subscription:", error)
     throw error
