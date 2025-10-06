@@ -3,9 +3,10 @@ import { Crown, Gem, Star, Shield, Award } from "lucide-react"
 interface UserLevelBadgeProps {
   level: "bronze" | "prata" | "gold" | "platinum" | "diamante"
   size?: "sm" | "md" | "lg"
+  className?: string
 }
 
-export function UserLevelBadge({ level, size = "md" }: UserLevelBadgeProps) {
+export function UserLevelBadge({ level, size = "md", className }: UserLevelBadgeProps) {
   console.log("[v0] UserLevelBadge received level:", level, "type:", typeof level)
 
   const sizeClasses = {
@@ -95,7 +96,7 @@ export function UserLevelBadge({ level, size = "md" }: UserLevelBadgeProps) {
 
   return (
     <div
-      className={`flex items-center space-x-2 ${containerSizes[size]} rounded-full border ${config.bgColor} ${config.borderColor} backdrop-blur-sm shadow-lg ${config.glow}`}
+      className={`flex items-center space-x-2 ${containerSizes[size]} rounded-full border ${config.bgColor} ${config.borderColor} backdrop-blur-sm shadow-lg ${config.glow} ${className || ""}`}
     >
       <div className="relative">
         <Icon className={`${sizeClasses[size]} ${config.color} drop-shadow-sm`} />

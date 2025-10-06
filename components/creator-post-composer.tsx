@@ -10,7 +10,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ImageIcon, VideoIcon, Loader2, X, Lock, Users, Crown, Upload } from "lucide-react"
+import { ImageIcon, VideoIcon, Loader2, X, Lock, Users, Crown, Upload, Shield, Award, Star, Gem } from "lucide-react"
 import { updateCreatorContentCount } from "@/lib/firebase/firestore"
 import { createPostAction } from "@/app/actions/posts"
 import { useAuthState } from "react-firebase-hooks/auth"
@@ -130,10 +130,16 @@ export function CreatorPostComposer({ userProfile, onPostCreated }: CreatorPostC
 
   const getLevelIcon = (level: string) => {
     switch (level) {
-      case "Platinum":
-        return <Crown className="h-3 w-3" />
       case "Diamante":
+        return <Gem className="h-3 w-3" />
+      case "Platinum":
+        return <Star className="h-3 w-3" />
+      case "Gold":
         return <Crown className="h-3 w-3" />
+      case "Prata":
+        return <Award className="h-3 w-3" />
+      case "Bronze":
+        return <Shield className="h-3 w-3" />
       default:
         return <Users className="h-3 w-3" />
     }
@@ -198,25 +204,25 @@ export function CreatorPostComposer({ userProfile, onPostCreated }: CreatorPostC
                     <SelectContent>
                       <SelectItem value="Bronze">
                         <div className="flex items-center space-x-1">
-                          <Users className="h-3 w-3 text-orange-500" />
+                          <Shield className="h-3 w-3 text-orange-500" />
                           <span>Bronze</span>
                         </div>
                       </SelectItem>
                       <SelectItem value="Gold">
                         <div className="flex items-center space-x-1">
-                          <Users className="h-3 w-3 text-yellow-500" />
+                          <Crown className="h-3 w-3 text-yellow-500" />
                           <span>Gold</span>
                         </div>
                       </SelectItem>
                       <SelectItem value="Platinum">
                         <div className="flex items-center space-x-1">
-                          <Crown className="h-3 w-3 text-pink-500" />
+                          <Star className="h-3 w-3 text-pink-500" />
                           <span>Platinum</span>
                         </div>
                       </SelectItem>
                       <SelectItem value="Diamante">
                         <div className="flex items-center space-x-1">
-                          <Crown className="h-3 w-3 text-cyan-500" />
+                          <Gem className="h-3 w-3 text-cyan-500" />
                           <span>Diamante</span>
                         </div>
                       </SelectItem>

@@ -3,7 +3,7 @@ import { useState, useEffect } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
+import { UserLevelBadge } from "@/components/user-level-badge"
 import { Settings, MessageCircle, Repeat2 } from "lucide-react"
 import Link from "next/link"
 import { TopNavigation } from "@/components/top-navigation"
@@ -222,23 +222,6 @@ export default function UserProfile() {
     }
   }
 
-  const getLevelIcon = (level: string) => {
-    switch (level) {
-      case "Gold":
-        return "🏆"
-      case "Platinum":
-        return "💎"
-      case "Diamante":
-        return "💠"
-      case "Bronze":
-        return "🥉"
-      case "Prata":
-        return "🥈"
-      default:
-        return "⭐"
-    }
-  }
-
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -268,7 +251,7 @@ export default function UserProfile() {
           <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/10 rounded-b-3xl" />
 
           <div className="relative p-4 sm:p-6 md:p-8 space-y-4 sm:space-y-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-start space-y-4 sm:space-y-0 sm:space-x-4 md:space-x-6">
+            <div className="flex flex-col items-center sm:flex-row sm:items-start space-y-4 sm:space-y-0 sm:space-x-4 md:space-x-6">
               <div className="relative">
                 <Avatar className="h-20 w-20 sm:h-24 sm:w-24 md:h-28 md:w-28 ring-2 ring-primary/30 shadow-lg">
                   <AvatarImage
@@ -285,7 +268,7 @@ export default function UserProfile() {
                 <div className="absolute -bottom-1 -right-1 h-4 w-4 md:h-5 md:w-5 bg-green-500 rounded-full border-2 border-background" />
               </div>
 
-              <div className="flex-1 space-y-2 sm:space-y-3 w-full sm:w-auto">
+              <div className="flex-1 space-y-2 sm:space-y-3 w-full sm:w-auto text-center sm:text-left">
                 <div>
                   <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">
                     {profileUser.displayName || profileUser.username}
@@ -293,13 +276,20 @@ export default function UserProfile() {
                   <p className="text-muted-foreground text-sm md:text-base">@{profileUser.username}</p>
                 </div>
 
-                <Badge
-                  variant="secondary"
-                  className={`${getLevelBadgeColor(profileUser.level || "bronze")} px-3 py-1 text-xs md:text-sm font-semibold rounded-full w-fit`}
-                >
-                  <span className="mr-1">{getLevelIcon(profileUser.level || "Bronze")}</span>
-                  {profileUser.level || "Bronze"}
-                </Badge>
+                <div className="flex justify-center sm:justify-start">
+                  <UserLevelBadge
+                    level={
+                      (profileUser.level?.toLowerCase() || "bronze") as
+                        | "bronze"
+                        | "prata"
+                        | "gold"
+                        | "platinum"
+                        | "diamante"
+                    }
+                    size="md"
+                    className="max-w-[200px]"
+                  />
+                </div>
               </div>
             </div>
 
