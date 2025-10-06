@@ -6,6 +6,8 @@ interface UserLevelBadgeProps {
 }
 
 export function UserLevelBadge({ level, size = "md" }: UserLevelBadgeProps) {
+  console.log("[v0] UserLevelBadge received level:", level, "type:", typeof level)
+
   const sizeClasses = {
     sm: "h-4 w-4",
     md: "h-5 w-5",
@@ -25,7 +27,11 @@ export function UserLevelBadge({ level, size = "md" }: UserLevelBadgeProps) {
   }
 
   const getLevelConfig = () => {
-    switch (level) {
+    const normalizedLevel = level?.toLowerCase() as "bronze" | "prata" | "gold" | "platinum" | "diamante"
+
+    console.log("[v0] Normalized level:", normalizedLevel)
+
+    switch (normalizedLevel) {
       case "bronze":
         return {
           icon: Shield,
@@ -72,6 +78,7 @@ export function UserLevelBadge({ level, size = "md" }: UserLevelBadgeProps) {
           glow: "shadow-cyan-500/20",
         }
       default:
+        console.warn("[v0] Unknown level, defaulting to Bronze:", normalizedLevel)
         return {
           icon: Shield,
           color: "text-amber-600",

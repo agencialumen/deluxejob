@@ -43,7 +43,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unknown subscription tier" }, { status: 400 })
     }
 
-    console.log("[v0] Updating user level to:", tier)
+    console.log("[v0] Mapped tier:", tier, "from price ID:", priceId)
+    console.log("[v0] Updating user level to:", tier, "type:", typeof tier)
 
     const userRef = doc(db, "users", userId)
     const userDoc = await getDoc(userRef)
@@ -66,6 +67,8 @@ export async function POST(request: NextRequest) {
     })
 
     console.log("[v0] User level updated successfully to:", tier)
+    const updatedUserDoc = await getDoc(userRef)
+    console.log("[v0] Verified user level in database:", updatedUserDoc.data()?.level)
 
     return NextResponse.json({
       success: true,
