@@ -15,6 +15,9 @@ export default function SubscriptionSuccessPage() {
   const [user] = useAuthState(auth)
   const [loading, setLoading] = useState(true)
   const [username, setUsername] = useState<string | null>(null)
+  const [verifying, setVerifying] = useState(false)
+  const [verificationError, setVerificationError] = useState<string | null>(null)
+  const [verificationSuccess, setVerificationSuccess] = useState(false)
 
   const sessionId = searchParams.get("session_id")
 
@@ -39,6 +42,50 @@ export default function SubscriptionSuccessPage() {
 
     return () => clearTimeout(timer)
   }, [user])
+
+  useEffect(() => {
+    const verifyCheckout = async () => {
+      if (!sessionId || !user || verifying || verificationSuccess) return
+
+      setVerifying(true)
+      console.log("[v0] Verifying checkout session and updating user level...")
+      console.log("[v0] Session ID:", sessionId)
+      console.log("[v0] User ID:", user.uid)
+
+      try {
+        const response = await fetch("/api/verify-checkout", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            sessionId,
+            userId: user.uid,
+          }),
+        })
+
+        const data = await response.json()
+        console.log("[v0] Verify checkout response:", data)
+
+        if (response.ok) {
+          console.log("[v0] ✅ Checkout verified and user level updated to:", data.tier)
+          setVerificationSuccess(true)
+        } else {
+          console.error("[v0] ❌ Error verifying checkout:", data.error)
+          setVerificationError(data.error)
+        }
+      } catch (error) {
+        console.error("[v0] ❌ Error verifying checkout:", error)
+        setVerificationError("Erro ao verificar assinatura")
+      } finally {
+        setVerifying(false)
+      }
+    }
+
+    if (user && sessionId && !loading) {
+      verifyCheckout()
+    }
+  }, [sessionId, user, loading, verifying, verificationSuccess])
 
   if (loading) {
     return (
@@ -71,6 +118,13 @@ export default function SubscriptionSuccessPage() {
             <p className="text-muted-foreground">
               Parabéns! Sua assinatura foi ativada com sucesso. Agora você tem acesso a todo o conteúdo exclusivo.
             </p>
+            {verifying && (
+              <p className="text-xs text-primary animate-pulse font-medium">⏳ Atualizando seu nível de usuário...</p>
+            )}
+            {verificationSuccess && (
+              <p className="text-xs text-green-500 font-medium">✅ Nível atualizado com sucesso!</p>
+            )}
+            {verificationError && <p className="text-xs text-destructive">⚠️ Nota: {verificationError}</p>}
           </div>
 
           {/* Benefits */}

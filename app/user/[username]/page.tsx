@@ -11,6 +11,8 @@ import { BottomNavigation } from "@/components/bottom-navigation"
 import { getCurrentUser, getUserProfile, getUserByUsername, getUserRetweets } from "@/lib/firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { UserProgressSection } from "@/components/user-progress-section"
+import { doc, onSnapshot } from "firebase/firestore"
+import { db } from "@/lib/firebase/config"
 
 interface UserProfile {
   uid: string
@@ -22,6 +24,7 @@ interface UserProfile {
   createdAt: any
   retweets?: number
   xp?: number
+  subscription?: any
 }
 
 interface Retweet {
@@ -89,6 +92,30 @@ export default function UserProfile() {
         setIsOwnProfile(currentUser.uid === targetUser.uid)
 
         console.log("[v0] User profile found:", targetUser)
+
+        const userDocRef = doc(db, "users", targetUser.uid)
+        const unsubscribe = onSnapshot(userDocRef, (docSnapshot) => {
+          if (docSnapshot.exists()) {
+            const updatedData = docSnapshot.data()
+            console.log("[v0] Profile updated in real-time:", updatedData)
+            setProfileUser((prev) => ({
+              ...prev!,
+              level: updatedData.level || prev!.level,
+              subscription: updatedData.subscription,
+            }))
+
+            // Update current user profile if viewing own profile
+            if (currentUser.uid === targetUser.uid) {
+              setCurrentUserProfile((prev: any) => ({
+                ...prev,
+                level: updatedData.level || prev.level,
+                subscription: updatedData.subscription,
+              }))
+            }
+          }
+        })
+
+        return () => unsubscribe()
       } catch (error) {
         console.error("Error loading user data:", error)
         toast({
